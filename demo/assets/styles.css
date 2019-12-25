@@ -1,0 +1,10 @@
+.log-message{
+    border: 1px solid #ddd;
+    padding: 5px;
+    margin-bottom: 5px;
+    font-size:9pt;
+}
+
+.log-row:nth-child(odd){
+    background-color: #eee;
+}

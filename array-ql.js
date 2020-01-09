@@ -16,7 +16,7 @@ class ArrayQL {
     const _srcArray =
       typeof rowsOrPath === "string" ? require(rowsOrPath) : rowsOrPath;
     if (!(_srcArray instanceof Array)) throw new Error("List must be an array");
-    
+
     this.trace = true;
 
     // acquire data
@@ -36,29 +36,6 @@ class ArrayQL {
 
     this._nextId = this.maxId() + 1; // find id for new row
   }
-  
-  /** Adds getters to all entries in array */
-  _mapGetters() {
-    const getterNames = Object.keys(this.options.getters);
-    if (!getterNames || !getterNames.length) return;
-    this._srcArray.forEach(this._addGetters.bind(this));
-  }
-
-  /** Adds getters to one entry 
-   * @param {object} record
-   * */
-  _addGetters(record) {
-    const getterNames = Object.keys(this.options.getters);
-    if (!getterNames || !getterNames.length) return;
-
-    getterNames.forEach(getterName => {
-      Object.defineProperty(record, getterName, {
-        get: this.options.getters[getterName].bind(record),
-        enumerable: true
-      });
-    });
-    return record;
-  }
 
   /** Resets previous select results
    * @returns {ArrayQL} */
@@ -73,9 +50,31 @@ class ArrayQL {
     this._limit = null;
     this._offset = null;
 
-
-    if (this.trace) console.log(`ArrayQL.select()`, this._filtered.length);
+    this._trace(`ArrayQL.select()`, this._filtered.length);
     return this;
+  }
+
+  /** Adds getters to all entries in array */
+  _mapGetters() {
+    const getterNames = Object.keys(this.options.getters);
+    if (!getterNames || !getterNames.length) return;
+    this._srcArray.forEach(this._addGetters.bind(this));
+  }
+
+  /** Adds getters to one entry
+   * @param {object} record
+   * */
+  _addGetters(record) {
+    const getterNames = Object.keys(this.options.getters);
+    if (!getterNames || !getterNames.length) return;
+
+    getterNames.forEach(getterName => {
+      Object.defineProperty(record, getterName, {
+        get: this.options.getters[getterName].bind(record),
+        enumerable: true
+      });
+    });
+    return record;
   }
   maxId() {
     if (!this._srcArray) return null;
@@ -87,22 +86,22 @@ class ArrayQL {
    * @param {string[]|string} keys comma separated string of array of keynames
    * @returns {ArrayQL} */
   select(keys) {
-	this.resetResult();
-	if(!keys) return this;
-    
-	if(typeof keys === "string" && Array.isArray(keys)){
-	  throw new Error(
-		`"keys" must be an array of ids or comma separated string of ids, ${typeof keys} given: ${keys}`
-	  );		
-	}
-	
-	let keysArr = Array.isArray(keys) ? keys : keys.split(/\s*,\s*/);
-	this._keys = keysArr.map(k => {
-		let [src, dest] = k.split(/\s+as\s+/).map(s => s.trim());
-		if(!dest) dest = src;
-		return {src, dest};
-	});
-	
+    this.resetResult();
+    if (!keys) return this;
+
+    if (typeof keys !== "string" && !Array.isArray(keys)) {
+      throw new Error(
+        `"keys" must be an array of ids or comma separated string of ids, ${typeof keys} given: ${keys}`
+      );
+    }
+
+    let keysArr = Array.isArray(keys) ? keys : keys.split(/\s*,\s*/);
+    this._keys = keysArr.map(k => {
+      let [src, dest] = k.split(/\s+as\s+/).map(s => s.trim());
+      if (!dest) dest = src;
+      return { src, dest };
+    });
+
     return this;
   }
 
@@ -122,7 +121,9 @@ class ArrayQL {
     this._logic = "and";
     return this;
   }
-  // does not work
+  /** Set active key name, dot notation is allowed
+   * @param {string} key
+   * @returns {ArrayQL} */
   or(key) {
     this._activeKey = key;
     this._logic = "or";
@@ -130,67 +131,45 @@ class ArrayQL {
   }
   concat(keys) {
     this._activeKey = keys;
-    if (this.trace) console.log(`ArrayQL.concat(${keys})`);
+    this._trace(`ArrayQL.concat(${keys})`);
     return this;
   }
 
   // CONDITIONS ===
 
   /**
-   * Includes entries where value of target key is NULL
-   * @param {any} val 
+   * Includes entries where value of active key is NULL
    * @returns {ArrayQL}
    */
-  isNull(val) {
-    if (val === undefined || val === null) return this;
+  isNull() {
+    this._filtrate(v => v === null);
 
-    this._filtered = this._filtered.filter(r => {
-      const rowVal = this._extractValue(r);
-      return rowVal === null;
-    });
-
-    this._unlimitedCount = this._filtered.length;
-    if (this.trace)
-      console.log(`ArrayQL.isNull(${val})`, this._filtered.length);
+    this._trace(`ArrayQL.isNull(${val})`, this._filtered.length);
     return this;
   }
   /**
-   * Includes entries where value of target key is not NULL
-   * @param {any} val 
+   * Includes entries where value of active key is not NULL
    * @returns {ArrayQL}
    */
-  notNull(val) {
-    if (val === undefined || val === null) return this;
+  notNull() {
+    this._filtrate(v => v !== null);
 
-    this._filtered = this._filtered.filter(r => {
-      const rowVal = this._extractValue(r);
-      return rowVal !== null;
-    });
-
-    this._unlimitedCount = this._filtered.length;
-    if (this.trace)
-      console.log(`ArrayQL.isNull(${val})`, this._filtered.length);
+    this._trace(`ArrayQL.isNull(${val})`, this._filtered.length);
     return this;
   }
 
-
   /**
-   * Includes entries where value of target key 
+   * Includes entries where value of active key
    * is stirictly equal to given value (including type)
-   * @param {any} val 
+   * @param {any} val
    * @returns {ArrayQL}
    */
   equalTo(val) {
     if (val === undefined || val === null) return this;
 
-    this._filtered = this._filtered.filter(r => {
-      const rowVal = this._extractValue(r);
-      return rowVal === val;
-    });
+    this._filtrate(v => v === val);
 
-    this._unlimitedCount = this._filtered.length;
-    if (this.trace)
-      console.log(`ArrayQL.equalTo(${val})`, this._filtered.length);
+    this._trace(`ArrayQL.equalTo(${val})`, this._filtered.length);
     return this;
   }
 
@@ -204,73 +183,87 @@ class ArrayQL {
   }
 
   /**
-   * Includes entries where target key has value
+   * Includes entries where active key has value
    * which has partial case-insensitive match with given value
    * @param {any} val any value will be stringified
    * @returns {ArrayQL}
    */
   like(val) {
     if (val === undefined || val === null) return this;
-    // if (typeof val !== "string")
-    //   throw new Error(
-    //     `"Like" condition is only for strings, ${typeof val} given`
-    //   );
+
     val = String(val).toLowerCase();
+    this._filtrate(v =>
+      String(v)
+        .toLowerCase()
+        .includes(val)
+    );
 
-    this._filtered = this._filtered.filter(r => {
-      let rowVal = this._extractValue(r);
-      if (typeof rowVal !== "string") return false;
-      return rowVal.toLowerCase().includes(val);
-    });
-
-    this._unlimitedCount = this._filtered.length;
-    if (this.trace) console.log(`ArrayQL.like(${val})`, this._filtered.length);
+    this._trace(`ArrayQL.like(${val})`, this._filtered.length);
     return this;
   }
   /**
-   * Includes entries where target key has value is less then given,
+   * Includes entries where active key has value which is less then given one
    * @param {number} val
    * @throws {Error} condition is only for numbers
    * @returns {ArrayQL}
    */
   lessThen(val) {
     if (val === undefined || val === null) return this;
-    if (typeof val !== "number")
-      throw new Error(
-        `"lessThen" condition is only for numbers, ${typeof val} ${val} given`
-      );
 
-    this._filtered = this._filtered.filter(r => {
-      let rowVal = this._extractValue(r);
-      if (typeof rowVal !== "number") return false;
-      return rowVal < val;
-    });
-    this._unlimitedCount = this._filtered.length;
+    this._filtrate(v => Number(v) < val);
     return this;
   }
   /**
-   * Includes entries where target key has value is more then given,
+   * Includes entries where active key has value is less then or equal to given,
    * @param {number} val
    * @throws {Error} condition is only for numbers
    * @returns {ArrayQL}
    */
-  moreThen(val) {
+  lessThenOrEqual(val) {
     if (val === undefined || val === null) return this;
-    if (typeof val !== "number")
-      throw new Error(
-        `"moreThen" condition is only for numbers, ${typeof val} ${val} given`
-      );
 
-    this._filtered = this._filtered.filter(r => {
-      let rowVal = this._extractValue(r);
-      if (typeof rowVal !== "number") return false;
-      return rowVal > val;
-    });
-    this._unlimitedCount = this._filtered.length;
+    this._filtrate(v => Number(v) <= val);
     return this;
   }
   /**
-   * Includes entries where target key has value between "min" and "max",
+   * Includes entries where active key has value is more then given,
+   * @param {number} val
+   * @throws {Error} condition is only for numbers
+   * @returns {ArrayQL}
+   */
+  greaterThen(val) {
+    if (val === undefined || val === null) return this;
+
+    this._filtrate(v => Number(v) > val);
+    return this;
+  }
+  /**
+   * Includes entries where active key has value is more or equal to given,
+   * @param {number} val
+   * @throws {Error} condition is only for numbers
+   * @returns {ArrayQL}
+   */
+  greaterThenOrEqual(val) {
+    if (val === undefined || val === null) return this;
+
+    this._filtrate(v => Number(v) >= val);
+    return this;
+  }
+  gt(val) {
+    return this.greaterThen(val);
+  }
+  lt(val) {
+    return this.lessThen(val);
+  }
+  gte(val) {
+    return this.greaterThenOrEqual(val);
+  }
+  lte(val) {
+    return this.lessThenOrEqual(val);
+  }
+
+  /**
+   * Includes entries where active key has value between "min" and "max",
    * including "min" and "max"
    * @param {number} min
    * @param {number} max
@@ -280,25 +273,12 @@ class ArrayQL {
   between(min, max) {
     if (min === undefined || min === null) min = -Infinity;
     if (max === undefined || max === null) max = Infinity;
-    if (typeof min !== "number")
-      throw new Error(
-        `"between" condition is only for numbers, ${typeof min} "${min}" given for "min"`
-      );
-    if (typeof max !== "number")
-      throw new Error(
-        `"between" condition is only for numbers, ${typeof max} "${max}" given for "max"`
-      );
 
-    this._filtered = this._filtered.filter(r => {
-      let rowVal = this._extractValue(r);
-      if (typeof rowVal !== "number") return false;
-      return rowVal >= min && rowVal <= max;
-    });
-    this._unlimitedCount = this._filtered.length;
+    this._filtrate(v => Number(v) >= min && Number(v) <= max);
     return this;
   }
   /**
-   * Excludes entries where target key has value between "min" and "max",
+   * Excludes entries where active key has value between "min" and "max",
    * excluding "min" and "max"
    * @param {number} min
    * @param {number} max
@@ -317,17 +297,12 @@ class ArrayQL {
         `"notBetween" condition is only for numbers, ${typeof max} ${max} given`
       );
 
-    this._filtered = this._filtered.filter(r => {
-      let rowVal = this._extractValue(r);
-      if (typeof rowVal !== "number") return false;
-      return rowVal < min || rowVal > max;
-    });
-    this._unlimitedCount = this._filtered.length;
+    this._filtrate(v => Number(v) < min || Number(v) > max);
     return this;
   }
 
   /**
-   * Leaves in resulting array entries where target key has value from "list"
+   * Leaves in resulting array entries where active key has value from "list"
    * @param {any[]} list
    * @throws {Error} "notIn" condition is only for arrays
    * @returns {ArrayQL}
@@ -339,15 +314,11 @@ class ArrayQL {
         `"in" condition is only for arrays, ${typeof list} given`
       );
 
-    this._filtered = this._filtered.filter(r => {
-      let rowVal = this._extractValue(r);
-      return list.includes(rowVal);
-    });
-    this._unlimitedCount = this._filtered.length;
+    this._filtrate(v => list.includes(v));
     return this;
   }
   /**
-   * Excludes entries where target key has value from "list"
+   * Excludes entries where active key has value from "list"
    * @param {any[]} list
    * @throws {Error} "notIn" condition is only for arrays
    * @returns {ArrayQL}
@@ -359,12 +330,43 @@ class ArrayQL {
         `"notIn" condition is only for arrays, ${typeof list} given`
       );
 
-    this._filtered = this._filtered.filter(r => {
-      let rowVal = this._extractValue(r);
-      return !list.includes(rowVal);
-    });
+    this._filtrate(v => !list.includes(v));
+    return this;
+  }
+
+  /**
+   * filtrates src array depending on this._logic and this._activeKey
+   * fn() got only arg - is active value from current row
+   * must return TRUE if value is corresponds to condition, and FALSE otherwise
+   * @param {function} fn  (value: any) => boolean
+   */
+  _filtrate(fn) {
+    // logic is "OR"
+    if (this._logic === "or") {
+      for (let i = 0; i < this._srcArray.length; i++) {
+        const row = this._srcArray[i];
+        const value = this._extractValue(row); // extract value depending of this._activeKey
+        if (!fn.call(null, value)) continue;
+        if (this._filtered.includes(row)) continue;
+        this._filtered.push(row);
+      }
+
+      // logic is "AND"
+    } else {
+      this._filtered = this._filtered.filter(row => {
+        // extract value depending of this._activeKey
+        const value = this._extractValue(row);
+        return fn.call(null, value);
+      });
+    }
+
     this._unlimitedCount = this._filtered.length;
     return this;
+  }
+
+  _trace(...args) {
+    if (!this.trace) return;
+    console.log.apply(null, args);
   }
 
   /** apply map to array
@@ -383,8 +385,6 @@ class ArrayQL {
     this._filtered = this._filtered.filter(fn);
     return this;
   }
-
-  query(queryStr) {}
 
   _extractDotted(row, dottedName) {
     if (!row) return row;
@@ -409,7 +409,7 @@ class ArrayQL {
   }
 
   /**
-   * Sorts _srcArray by specified key
+   * Sorts result by specified key
    * @param {String} keyname
    * @param {String} direction "asc" or "desc"
    * @returns {ArrayQL}
@@ -429,8 +429,9 @@ class ArrayQL {
   }
 
   /**
-   * Cutting of resulting array for pagination
-   * Does not affect this._unlimitedCount
+   * Leaves only "limit" elements from resulting array, 
+   * beginning from "offset" element. Necessery for pagination. 
+   * Remembers "unlimited" count for getResult() method
    * @param {number} offset
    * @param {number} limit
    * @returns {ArrayQL}
@@ -445,13 +446,12 @@ class ArrayQL {
     const start = limit * offset;
     const end = start + limit;
     this._filtered = this._filtered.slice(start, end);
-    if (this.trace)
-      console.log(`ArrayQL.limit(${limit}, ${offset})`, this._filtered.length);
+    this._trace(`ArrayQL.limit(${limit}, ${offset})`, this._filtered.length);
     return this;
   }
   /** Adds a new entry to the array,
    * taking into account the getters and the default entry.
-   * If newRow contains id and entry with such id already exists
+   * If newRow contains "id" and entry with such id already exists,
    * exception will be thrown
    * @param {Object} newRow
    * @throws {Error} Item with given id already exist
@@ -473,8 +473,8 @@ class ArrayQL {
     }
     this._addGetters(newRow);
 
-    this._srcArray.unshift(newRow); // add to start of _srcArray
-    if (this.trace) console.log(`ArrayQL.insert()`, this._filtered.length);
+    this._srcArray.push(newRow); // add to start of _srcArray
+    this._trace(`ArrayQL.insert()`, this._filtered.length);
     return newRow;
   }
 
@@ -484,7 +484,7 @@ class ArrayQL {
    */
   update(newData) {
     if (newData[this.idName] === null || newData[this.idName] === undefined)
-      throw new Error("No id given for update");
+      throw new Error("No id specified for update");
     const existing = this._srcArray.find(
       el => el[this.idName] === newData[this.idName]
     );
@@ -503,7 +503,7 @@ class ArrayQL {
    */
   delete(removingIds) {
     if (removingIds === undefined || removingIds === null)
-      throw new Error("No ids given to delete");
+      throw new Error("No ids specified to delete");
     if (!(removingIds instanceof Array)) removingIds = [removingIds];
 
     const deleted = [];
@@ -515,7 +515,7 @@ class ArrayQL {
         return true;
       }
     });
-    if (this.trace) console.log(`ArrayQL.delete()`, this._filtered.length);
+    this._trace(`ArrayQL.delete()`, this._filtered.length);
     return deleted;
   }
 
@@ -575,7 +575,7 @@ class ArrayQL {
       content,
       totalElements: this._unlimitedCount,
       totalPages,
-      last:  this._limit ? this._limit * this._offset >= totalPages : null,
+      last: this._limit ? this._limit * this._offset >= totalPages : null,
       first: this._limit ? this._offset === 0 : null
       // sort: null,
       // size: null,

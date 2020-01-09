@@ -26,20 +26,23 @@
 		}
 	);
 
-	logArr( UsersQL.select().getList(), "full list: UsersQL.select().getList()" );
+	// logArr( UsersQL.select().getList(), "full list: UsersQL.select().getList()" );
 	
-	com( 'UsersQL.select("name, gender").where("gender").is("female").limit(0,2).getResult()' );
+	// com( 'UsersQL.select("name, gender").where("gender").is("female").limit(0,2).getResult()' );
 
-	com( 'UsersQL.getById(2)' );
-	com( 'UsersQL.select(`id, name as username`).where("name").like("ta").getList()' );
-//	com( 'UsersQL.select("name, age").where("age").between(20,30).and("gender").is("female").orderBy("firstName", "asc").getList()' );
-//	com( 'UsersQL.select("name, age").where("age").notBetween(20,30).and("gender").is("female").getList()' );
-//	com( 'UsersQL.select("id, name, addr.city").where("addr.city").like("burg").getList()' );
-//	com( 'UsersQL.select("id, name").where("id").notIn([2,3]).getList()' );
-//	com( 'UsersQL.insert({firstName: "Jennie", lastName: "Gerhardt", addr: {city: "Chicago"}})' );
-//	com( 'UsersQL.update({id: 1, firstName: "Phillip",  age: 75})' );
-//	com( 'UsersQL.delete([2,3])' );
-//	com( 'UsersQL.select().getList()' );
+	// com( 'UsersQL.getById(2)' );
+	// com( 'UsersQL.select(`id, name as username`).where("name").like("ta").getList()' );
+	// com( 'UsersQL.select("name, age").where("age").between(20,30).and("gender").is("female").orderBy("firstName", "asc").getList()' );
+	// com( 'UsersQL.select("name, age").where("age").notBetween(20,30).and("gender").is("female").getList()' );
+	// com( 'UsersQL.select("id, name, addr.city").where("addr.city").like("burg").getList()' );
+	// com( 'UsersQL.select("id, name").where("id").notIn([2,3]).getList()' );
+	// com( 'UsersQL.select("id, name, age").where("firstName").is("Clyde").or("age").greaterThen(30).getList()' );
+	com( 'UsersQL.select("id, name, age").where("age").lt(22).getList()' );
+
+	// com( 'UsersQL.insert({firstName: "Jennie", lastName: "Gerhardt", addr: {city: "Chicago"}})' );
+	// com( 'UsersQL.update({id: 1, firstName: "Phillip",  age: 75})' );
+	// com( 'UsersQL.delete([2,3])' );
+	// com( 'UsersQL.select().getList()' );
 
 
 

@@ -165,7 +165,7 @@ const selected = table.select("id, name").where("age").between(20,30).getList();
 <table>
     <tr>
         <td>insert(row: any) => row</td>
-        <td>Adds a new entry to the array, taking into account the getters and the default entry. If new row contains "id" and entry with such id already exists, exception will be thrown. Returns inserted row.</td>
+        <td>Adds a new entry to the array, taking into account getters and default entry. If new row contains "id" and entry with such id already exists, exception will be thrown. Returns inserted row.</td>
     </tr>
     <tr>
         <td>update(rowData: any) => row</td>

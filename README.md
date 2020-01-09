@@ -1,7 +1,7 @@
 # ArrayQL
 
 Treat array of objects as a table SQL-alike way.
-Paginate, select, sort, update, insert, delete. Calculated and default values.
+Paginate, select, sort, update, insert, delete. Add calculated and default values.
 
 ```javascript
 USERS.select("id, name").where("age").between(20,30).limit(0,15).getResult();
@@ -30,7 +30,7 @@ const selected = table.select("id, name").where("age").between(20,30).getList();
 <table>
     <tr>
         <td>select(keys?: string)</td>
-        <td>Resets previous select results, sets necessery keys. keys - is optional argument, comma separated string, including renaming, for example: "id, name as username". If no "keys" is set complete entries will be returned</td>
+        <td>Resets previous select results, sets necessery keys. keys - is optional argument, comma separated string, including renaming, for example: "id, name as username". If no "keys" is set, then complete entries will be returned</td>
     </tr>
     <tr>
         <td>where(key: string)</td>

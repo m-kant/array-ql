@@ -17,7 +17,7 @@ class ArrayQL {
       typeof rowsOrPath === "string" ? require(rowsOrPath) : rowsOrPath;
     if (!(_srcArray instanceof Array)) throw new Error("List must be an array");
 
-    this.trace = true;
+    this.trace = false;
 
     // acquire data
     this._srcArray = _srcArray;
@@ -25,10 +25,12 @@ class ArrayQL {
       {
         idName: "id",
         default: {}, // default record
-        getters: {} // computed fields
+        getters: {}, // computed fields
+        trace: false
       },
       options
     );
+    this.trace = this.options.trace || false;
     this._mapGetters();
     this._mapDefaults();
     this.idName = this.options.idName; // shortcut

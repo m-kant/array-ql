@@ -9,10 +9,9 @@ const babel     = require('gulp-babel');
 
 gulp.task('clean', function(){ return del(['dist/*']); });
 
-gulp.task("build-es5", () =>
+gulp.task("build", () =>
   gulp
     .src(["src/array-ql.js"])
-    // .pipe(concat('array-ql.js'))
     .pipe(
       babel({
         presets: ["@babel/env"]
@@ -33,5 +32,5 @@ gulp.task('build-es6', () =>
     .pipe(gulp.dest('dist'))
 );
 
-gulp.task('build', gulp.series( 'clean', gulp.parallel(['build-es5', 'build-es6'])));
+gulp.task('clean_build', gulp.series( 'clean', gulp.parallel(['build'])));
 gulp.task('default', gulp.series('build') );

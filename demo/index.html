@@ -5,7 +5,7 @@
 	<title>ArrayQL</title>
 	<script src='./assets/arr.js' charset='UTF-8'></script>
 	<script src='./assets/app.js' charset='UTF-8'></script>
-	<script src='../array-ql.js' charset='UTF-8'></script>
+	<script src='../src/array-ql.js' charset='UTF-8'></script>
 	<link rel="stylesheet" href="./assets/styles.css">
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
 		integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -19,7 +19,7 @@
 	const UsersQL = new ArrayQL(
 		ARR, 
 		{
-			default: { id: null, firstName: null, lastName: null, "gender": null, "age": null, "addr": { "city": null, "num": null } }, 
+			default: { id: null, firstName: null, lastName: null, "gender": null, "age": null, "addr": { "city": null, "num": null }, position: "boss" }, 
 			getters: {
 				name(){ return `${this.firstName} ${this.lastName}` }
 			}

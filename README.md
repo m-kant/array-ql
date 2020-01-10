@@ -226,7 +226,7 @@ const selected = table.select("id, name").where("age").between(20,30).getList();
         default: { firstName: "Unknown",    lastName: "",   gender: null, age: null },
         getters: {
             // getter for field "name"
-            name(r){ return `${r.firstName} ${r.lastName}`; }
+            name(row){ return `${row.firstName} ${row.lastName}`; }
         }
     }
 

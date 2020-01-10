@@ -59,6 +59,8 @@ function () {
 
     this._mapGetters();
 
+    this._mapDefaults();
+
     this.idName = this.options.idName; // shortcut
 
     this.resetResult();
@@ -115,15 +117,42 @@ function () {
       });
       return record;
     }
+    /** Adds defaults to all entries in array */
+
+  }, {
+    key: "_mapDefaults",
+    value: function _mapDefaults() {
+      var defaultNames = Object.keys(this.options["default"]);
+      if (!defaultNames || !defaultNames.length) return;
+
+      this._srcArray.forEach(this._addDefaults.bind(this));
+    }
+    /** Adds defaults to one entry
+     * @param {object} record
+     * */
+
+  }, {
+    key: "_addDefaults",
+    value: function _addDefaults(record) {
+      var _this2 = this;
+
+      var defaultNames = Object.keys(this.options["default"]);
+      if (!defaultNames || !defaultNames.length) return;
+      defaultNames.forEach(function (defaultName) {
+        if (record[defaultName] !== undefined) return;
+        record[defaultName] = _this2.options["default"][defaultName];
+      });
+      return record;
+    }
   }, {
     key: "maxId",
     value: function maxId() {
-      var _this2 = this;
+      var _this3 = this;
 
       if (!this._srcArray) return null;
       if (!this._srcArray.length) return 0;
       return Math.max.apply(Math, _toConsumableArray(this._srcArray.map(function (r) {
-        return r[_this2.idName];
+        return r[_this3.idName];
       })));
     }
     /** Resets previous select results
@@ -467,7 +496,7 @@ function () {
   }, {
     key: "_filtrate",
     value: function _filtrate(fn) {
-      var _this3 = this;
+      var _this4 = this;
 
       // logic is "OR"
       if (this._logic === "or") {
@@ -486,7 +515,7 @@ function () {
       } else {
         this._filtered = this._filtered.filter(function (row) {
           // extract value depending of this._activeKey
-          var value = _this3._extractValue(row);
+          var value = _this4._extractValue(row);
 
           return fn.call(null, value);
         });
@@ -623,13 +652,13 @@ function () {
   }, {
     key: "insert",
     value: function insert(newRow) {
-      var _this4 = this;
+      var _this5 = this;
 
       newRow = Object.assign({}, this.options["default"], newRow); // id given by user
 
       if (newRow[this.idName] !== undefined && newRow[this.idName] !== null) {
         var existing = this._srcArray.find(function (r) {
-          return r[_this4.idName] === newRow[_this4.idName];
+          return r[_this5.idName] === newRow[_this5.idName];
         });
 
         if (existing) throw new Error("Item with id \"".concat(newRow[this.idName], "\" already exist")); // assign id automatically
@@ -654,12 +683,12 @@ function () {
   }, {
     key: "update",
     value: function update(newData) {
-      var _this5 = this;
+      var _this6 = this;
 
       if (newData[this.idName] === null || newData[this.idName] === undefined) throw new Error("No id specified for update");
 
       var existing = this._srcArray.find(function (el) {
-        return el[_this5.idName] === newData[_this5.idName];
+        return el[_this6.idName] === newData[_this6.idName];
       });
 
       if (!existing) throw new Error("No element with id \"".concat(newData[this.idName], "\" found for update"));
@@ -675,13 +704,13 @@ function () {
   }, {
     key: "delete",
     value: function _delete(removingIds) {
-      var _this6 = this;
+      var _this7 = this;
 
       if (removingIds === undefined || removingIds === null) throw new Error("No ids specified to delete");
       if (!(removingIds instanceof Array)) removingIds = [removingIds];
       var deleted = [];
       this._srcArray = this._srcArray.filter(function (el) {
-        if (removingIds.includes(el[_this6.idName])) {
+        if (removingIds.includes(el[_this7.idName])) {
           deleted.push(el);
           return false;
         } else {
@@ -701,10 +730,10 @@ function () {
   }, {
     key: "getById",
     value: function getById(id) {
-      var _this7 = this;
+      var _this8 = this;
 
       var record = this._srcArray.find(function (r) {
-        return r[_this7.idName] === id;
+        return r[_this8.idName] === id;
       });
 
       if (!record) throw new Error("No record with id \"".concat(id, "\" found"));
@@ -745,14 +774,14 @@ function () {
   }, {
     key: "getList",
     value: function getList() {
-      var _this8 = this;
+      var _this9 = this;
 
       if (!this._keys) return this._filtered;
       return this._filtered.map(function (r) {
         var res = {};
 
-        _this8._keys.forEach(function (k) {
-          res[k.dest] = _this8._extractValue(r, k.src);
+        _this9._keys.forEach(function (k) {
+          res[k.dest] = _this9._extractValue(r, k.src);
         });
 
         return res;

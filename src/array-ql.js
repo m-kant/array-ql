@@ -30,6 +30,7 @@ class ArrayQL {
       options
     );
     this._mapGetters();
+    this._mapDefaults();
     this.idName = this.options.idName; // shortcut
 
     this.resetResult();
@@ -60,7 +61,6 @@ class ArrayQL {
     if (!getterNames || !getterNames.length) return;
     this._srcArray.forEach(this._addGetters.bind(this));
   }
-
   /** Adds getters to one entry
    * @param {object} record
    * */
@@ -76,6 +76,28 @@ class ArrayQL {
     });
     return record;
   }
+
+  /** Adds defaults to all entries in array */
+  _mapDefaults() {
+    const defaultNames = Object.keys(this.options.default);
+    if (!defaultNames || !defaultNames.length) return;
+    this._srcArray.forEach(this._addDefaults.bind(this));
+  }
+  /** Adds defaults to one entry
+   * @param {object} record
+   * */
+  _addDefaults(record) {
+    const defaultNames = Object.keys(this.options.default);
+    if (!defaultNames || !defaultNames.length) return;
+
+    defaultNames.forEach(defaultName => {
+      if (record[defaultName] !== undefined) return;
+      record[defaultName] = this.options.default[defaultName];
+    });
+    return record;
+  }
+
+
   maxId() {
     if (!this._srcArray) return null;
     if (!this._srcArray.length) return 0;

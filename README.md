@@ -107,7 +107,7 @@ const selected = table.select("id, name").where("age").between(20,30).getList();
     </tr>
     <tr>
         <td>gte(val:number)</td>
-        <td>alias to lessThenOrEqual()</td>
+        <td>alias to greaterThenOrEqual()</td>
     </tr>
     <tr>
         <td>between(min: number, max: number)</td>

@@ -64,19 +64,21 @@ class ArrayQL {
     this._srcArray.forEach(this._addGetters.bind(this));
   }
   /** Adds getters to one entry
-   * @param {object} record
+   * @param {object} row
    * */
-  _addGetters(record) {
+  _addGetters(row) {
     const getterNames = Object.keys(this.options.getters);
     if (!getterNames || !getterNames.length) return;
 
     getterNames.forEach(getterName => {
-      Object.defineProperty(record, getterName, {
-        get: this.options.getters[getterName].bind(record),
+	  const getterFn = this.options.getters[getterName];
+      Object.defineProperty(row, getterName, {
+//        get: this.options.getters[getterName].bind(record),
+        get: function(){ return getterFn.call(row, row); },
         enumerable: true
       });
     });
-    return record;
+    return row;
   }
 
   /** Adds defaults to all entries in array */

@@ -160,7 +160,7 @@ const selected = table.select("id, name").where("age").between(20,30).getList();
     </tr>
 </table>
 
-## Data manipulation
+## Data manipulation (CRUD)
 
 <table>
     <tr>
@@ -210,38 +210,36 @@ const selected = table.select("id, name").where("age").between(20,30).getList();
 
 ## Examples
 
-```Javascript
+```javascript
+const ArrayQL = require("array-ql");
 
-    const ArrayQL = require("array-ql");
+// regular array of objects with same structure
+const arr = [
+    { id: 1, firstName: "Clyde",     lastName: "Griffiths",  gender: "male",   age: 24 },
+    { id: 5, firstName: "Sondra",    lastName: "Finchley",   gender: "female", age: 22 }
+]
 
-    // regular array of objects with same structure
-    const arr = [
-        { id: 1, firstName: "Clyde",     lastName: "Griffiths",  gender: "male",   age: 24 },
-        { id: 5, firstName: "Sondra",    lastName: "Finchley",   gender: "female", age: 22 }
-    ]
-
-    const options = {
-        idName: "id",
-        // default field values
-        default: { firstName: "Unknown",    lastName: "",   gender: null, age: null },
-        getters: {
-            // getter for field "name"
-            name(row){ return `${row.firstName} ${row.lastName}`; }
-        }
+const options = {
+    idName: "id",
+    // default field values
+    default: { firstName: "Unknown",    lastName: "",   gender: null, age: null },
+    getters: {
+        // getter for field "name"
+        name(row){ return `${row.firstName} ${row.lastName}`; }
     }
+}
 
-    const users = new ArrayQL(arr, options);
+const users = new ArrayQL(arr, options);
 
-    users.select("id, name").where("gender").is("male").getList(); // [{id: 1, name: "Clyde Griffiths"}]
+users.select("id, name").where("gender").is("male").getList(); // [{id: 1, name: "Clyde Griffiths"}]
 
-    users.insert({firstName: "Agrafena"}); // {id: 6, firstName: "Agrafena",  lastName: "", name: "Agrafena ", gender: null, age: null}
+users.insert({firstName: "Agrafena"}); // {id: 6, firstName: "Agrafena",  lastName: "", name: "Agrafena ", gender: null, age: null}
 
-    users.update({lastName: "Svetlova"}); // Error: "No id specified for update"
+users.update({lastName: "Svetlova"}); // Error: "No id specified for update"
 
-    users.update({id: 6, lastName: "Svetlova", gender: "female", age: 31}); // {id: 6, firstName: "Agrafena",  lastName: "Svetlova", name: "Agrafena Svetlova", gender: female, age: 31}
+users.update({id: 6, lastName: "Svetlova", gender: "female", age: 31}); // {id: 6, firstName: "Agrafena",  lastName: "Svetlova", name: "Agrafena Svetlova", gender: female, age: 31}
 
-    users.select("name as username").where("age").gt(30).getList(); // [{username: "Agrafena Svetlova"}]
+users.select("name as username").where("age").gt(30).getList(); // [{username: "Agrafena Svetlova"}]
 
-    users.select("id, name").limit(0, 2).getResult(); // {content: [{id: 1, name: "Clyde Griffiths"}, {id: 5, name "Sondra Finchley"}], totalElements: 3, totalPages: 2, last: false, first: true}
-
+users.select("id, name").limit(0, 2).getResult(); // {content: [{id: 1, name: "Clyde Griffiths"}, {id: 5, name "Sondra Finchley"}], totalElements: 3, totalPages: 2, last: false, first: true}
 ```

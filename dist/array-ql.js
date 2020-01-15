@@ -46,16 +46,18 @@ function () {
     var _srcArray = typeof rowsOrPath === "string" ? require(rowsOrPath) : rowsOrPath;
 
     if (!(_srcArray instanceof Array)) throw new Error("List must be an array");
-    this.trace = true; // acquire data
+    this.trace = false; // acquire data
 
     this._srcArray = _srcArray;
     this.options = Object.assign({
       idName: "id",
       "default": {},
       // default record
-      getters: {} // computed fields
-
+      getters: {},
+      // computed fields
+      trace: false
     }, options);
+    this.trace = this.options.trace || false;
 
     this._mapGetters();
 
@@ -99,23 +101,27 @@ function () {
       this._srcArray.forEach(this._addGetters.bind(this));
     }
     /** Adds getters to one entry
-     * @param {object} record
+     * @param {object} row
      * */
 
   }, {
     key: "_addGetters",
-    value: function _addGetters(record) {
+    value: function _addGetters(row) {
       var _this = this;
 
       var getterNames = Object.keys(this.options.getters);
       if (!getterNames || !getterNames.length) return;
       getterNames.forEach(function (getterName) {
-        Object.defineProperty(record, getterName, {
-          get: _this.options.getters[getterName].bind(record),
+        var getterFn = _this.options.getters[getterName];
+        Object.defineProperty(row, getterName, {
+          //        get: this.options.getters[getterName].bind(record),
+          get: function get() {
+            return getterFn.call(row, row);
+          },
           enumerable: true
         });
       });
-      return record;
+      return row;
     }
     /** Adds defaults to all entries in array */
 

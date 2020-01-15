@@ -1,7 +1,7 @@
 # ArrayQL
 
 Treat array of objects as a table SQL-alike way.
-Paginate, select, sort, update, insert, delete. Add calculated and default values.
+Paginate, select, sort, update, insert, delete. Add calculated and default values. Runs in browser and Node.
 
 ```javascript
 USERS.select("id, name").where("age").between(20,30).limit(0,15).getResult();

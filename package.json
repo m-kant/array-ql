@@ -1,10 +1,13 @@
 {
   "name": "array-ql",
   "description": "Treat array of objects as a table SQL-alike way. Paginate, select, sort, update, insert, delete. Add calculated and default values",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "license": "MIT",
   "private": false,
-  "scripts": {},
+  "scripts": {
+    "dts": "jsdoc src/array-ql.js -t node_modules/tsd-jsdoc/dist -r -d src",
+    "build": "gulp build"
+  },
   "main": "dist/array-ql.min.js",
   "keywords": [
     "a-la SQL",
@@ -33,6 +36,9 @@
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^2.0.0",
     "gulp-uglify": "^3.0.2",
+    "tsd-jsdoc": "^2.4.0",
     "gulp-uglify-es": "^2.0.0"
+  },
+  "dependencies": {
   }
 }

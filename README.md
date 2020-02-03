@@ -182,11 +182,11 @@ const selected = table.select("id, name").where("age").between(20,30).getList();
 <table>
     <tr>
         <td>filter( callback(row: any) => boolean )</td>
-        <td>Applies callback to resulting array as standart Array.filter() method. </td>
+        <td>Applies standart Array.filter() method to selection and changes it, returns ArrayQL instance (thus, can be used in chaining).</td>
     </tr>
     <tr>
         <td>map( callback(row: any) => any )</td>
-        <td>Applies callback to resulting array as standart Array.map() method.</td>
+        <td>Applies standart Array.map() method to selection and transforms it, returns ArrayQL instance (thus, can be used in chaining).</td>
     </tr>
 </table>
 
@@ -195,7 +195,7 @@ const selected = table.select("id, name").where("age").between(20,30).getList();
 <table>
     <tr>
         <td>idName: string</td>
-        <td>Default is "id"</td>
+        <td>Default is "id". Name of identification key</td>
     </tr>
     <tr>
         <td>default: object</td>
@@ -215,18 +215,18 @@ const ArrayQL = require("array-ql");
 
 // regular array of objects with same structure
 const arr = [
-    { id: 1, firstName: "Clyde",     lastName: "Griffiths",  gender: "male",   age: 24 },
-    { id: 5, firstName: "Sondra",    lastName: "Finchley",   gender: "female", age: 22 }
+  { id: 1, firstName: "Clyde",  lastName: "Griffiths", gender: "male",   age: 24 },
+  { id: 5, firstName: "Sondra", lastName: "Finchley",  gender: "female", age: 22 }
 ]
 
 const options = {
-    idName: "id",
-    // default field values
-    default: { firstName: "Unknown",    lastName: "",   gender: null, age: null },
-    getters: {
-        // getter for field "name"
-        name(row){ return `${row.firstName} ${row.lastName}`; }
-    }
+  idName: "id",
+  // default field values
+  default: { firstName: "Unknown", lastName: "", gender: null, age: null },
+  getters: {
+    // getter for field "name"
+    name(row){ return `${row.firstName} ${row.lastName}`; }
+  }
 }
 
 const users = new ArrayQL(arr, options);

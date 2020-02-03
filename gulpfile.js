@@ -9,8 +9,14 @@ const babel     = require('gulp-babel');
 
 gulp.task('clean', function(){ return del(['dist/*']); });
 
-gulp.task("build", () =>
-  gulp
+gulp.task("copy-dts", () => {
+  return gulp.src(["src/types.d.ts"])
+    .pipe(rename("array-ql.d.js"))
+    .pipe(gulp.dest("dist"));
+})
+
+gulp.task("build-js", () =>{
+  return gulp
     .src(["src/array-ql.js"])
     .pipe(
       babel({
@@ -20,8 +26,11 @@ gulp.task("build", () =>
     .pipe(gulp.dest("dist"))
     .pipe(rename("array-ql.min.js"))
     .pipe(uglify())
-    .pipe(gulp.dest("dist"))
-);
+    .pipe(gulp.dest("dist"));
+});
+
+gulp.task("build", gulp.parallel("build-js", "copy-dts"));
+
 
 gulp.task('build-es6', () =>
     gulp.src(['src/array-ql.js', 'src/footer.es6.js'])

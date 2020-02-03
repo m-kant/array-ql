@@ -1,1 +1,5 @@
+traceLabel is needed
+get by id is a strict check when id is numerical string - it is disturbs
 add typings
+default values as a functions, forexample to add current timestamp
+add Clone func, may be cloneById 
